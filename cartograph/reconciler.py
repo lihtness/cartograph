@@ -45,6 +45,10 @@ def run(config: Config) -> ReconcileResult:
         if state_mod.is_resolved(state, flag.id):
             flag.resolved = True
 
+    from cartograph import observations as obs_mod
+    obs_mod.update(config)
+    obs_mod.cleanup(config)
+
     state.last_run = datetime.now(tz=timezone.utc)
     state_mod.save(state, config.repo_path)
 

@@ -22,6 +22,9 @@ def generate(config: Config, query: str | None = None) -> str:
         "",
         *_orientation(config, query=query),
     ]
+    affected = _recently_affected(config)
+    if affected:
+        parts += ["", *affected]
     return "\n".join(parts)
 
 
@@ -102,6 +105,20 @@ def _rank_sections(sections: list, query: str) -> tuple[list, bool]:
     )
     top = min(3, len(sections))
     return [s for _, s in scored[:top]], True
+
+
+def _recently_affected(config: Config) -> list[str]:
+    try:
+        from cartograph import observations as obs_mod
+        recent = obs_mod.query_recent(config, n=10)
+    except Exception:
+        return []
+    if not recent:
+        return []
+    lines = ["## Recently affected docs", ""]
+    for md_file, section, count in recent[:6]:
+        lines.append(f"  {md_file}#{section}  ({count}×)")
+    return lines
 
 
 def _strip_prefix(text: str) -> str:

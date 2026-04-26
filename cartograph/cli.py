@@ -41,6 +41,9 @@ def main(argv=None, repo_path=None):
     p_close.add_argument("--period", default=None, metavar="PERIOD",
                          help="Period label, e.g. 2026-W18 (default: current ISO week)")
 
+    p_related = sub.add_parser("related", help="Show docs historically related to a code file.")
+    p_related.add_argument("file", metavar="FILE")
+
     p_manifest = sub.add_parser("manifest", help="Manage the manifest dependency graph.")
     ms = p_manifest.add_subparsers(dest="manifest_command", metavar="manifest-command")
 
@@ -82,6 +85,8 @@ def main(argv=None, repo_path=None):
             return _track_close(config, args.period)
         p_track.print_help()
         return 0
+    if args.command == "related":
+        return _related(config, args.file)
     if args.command == "manifest":
         if args.manifest_command == "add-edge":
             return _manifest_add_edge(config, args)
@@ -154,6 +159,17 @@ def _track_close(config, period):
     except (FileNotFoundError, ValueError) as e:
         print(f"Error: {e}")
         return 1
+    return 0
+
+
+def _related(config, file_path):
+    from cartograph import observations as obs_mod
+    results = obs_mod.query_file(config, file_path)
+    if not results:
+        print(f"No observations for {file_path}")
+        return 0
+    for md_file, section, count in results:
+        print(f"{md_file}:{section}  ({count}×)")
     return 0
 
 
