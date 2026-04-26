@@ -11,7 +11,7 @@ from cartograph.state import make_flag_id
 
 
 def run(config: Config, last_run: datetime | None = None) -> list[Flag]:
-    roadmap_path = config.repo_path / config.docs.roadmap
+    roadmap_path = config.repo_path / config.track.dir / config.track.current
     if not roadmap_path.exists():
         return []
 

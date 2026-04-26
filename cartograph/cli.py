@@ -23,6 +23,8 @@ def main(argv=None, repo_path=None):
 
     sub.add_parser("status", help="Show last run timestamp and resolved flag count.")
 
+    sub.add_parser("context", help="Print session context: current work, reconcile status, orientation.")
+
     p_init = sub.add_parser("init", help="Scaffold a new project.")
     p_init.add_argument("--template", default=None, metavar="TEMPLATE")
 
@@ -30,6 +32,12 @@ def main(argv=None, repo_path=None):
     p_section.add_argument("name")
     p_section.add_argument("--question", default="", metavar="QUESTION")
     p_section.add_argument("--lifecycle", default="Stable", metavar="LIFECYCLE")
+
+    p_track = sub.add_parser("track", help="Manage the track directory.")
+    ts = p_track.add_subparsers(dest="track_command", metavar="track-command")
+    p_close = ts.add_parser("close", help="Seal closed items from current.md into a period file.")
+    p_close.add_argument("--period", default=None, metavar="PERIOD",
+                         help="Period label, e.g. 2026-W18 (default: current ISO week)")
 
     p_manifest = sub.add_parser("manifest", help="Manage the manifest dependency graph.")
     ms = p_manifest.add_subparsers(dest="manifest_command", metavar="manifest-command")
@@ -55,6 +63,8 @@ def main(argv=None, repo_path=None):
     if args.command is None:
         parser.print_help()
         return 0
+    if args.command == "context":
+        return _context(config)
     if args.command == "reconcile":
         return _reconcile(config)
     if args.command == "resolve":
@@ -65,6 +75,11 @@ def main(argv=None, repo_path=None):
         return _init(config, args.template)
     if args.command == "add-section":
         return _add_section(config, args.name, args.question, args.lifecycle)
+    if args.command == "track":
+        if args.track_command == "close":
+            return _track_close(config, args.period)
+        p_track.print_help()
+        return 0
     if args.command == "manifest":
         if args.manifest_command == "add-edge":
             return _manifest_add_edge(config, args)
@@ -72,6 +87,12 @@ def main(argv=None, repo_path=None):
             return _manifest_add_fact(config, args)
         p_manifest.print_help()
         return 0
+    return 0
+
+
+def _context(config):
+    from cartograph import context as context_mod
+    print(context_mod.generate(config))
     return 0
 
 
@@ -120,6 +141,17 @@ def _add_section(config, name, question, lifecycle):
     from cartograph import scaffold
     scaffold.add_section(config.repo_path, name, question, lifecycle)
     print(f"Section '{name}' added.")
+    return 0
+
+
+def _track_close(config, period):
+    from cartograph import track as track_mod
+    try:
+        sealed = track_mod.close(config.repo_path, config, period=period)
+        print(f"Sealed: {sealed}")
+    except (FileNotFoundError, ValueError) as e:
+        print(f"Error: {e}")
+        return 1
     return 0
 
 

@@ -6,9 +6,10 @@ from cartograph.config import Config
 from cartograph.reconciler import ReconcileResult
 
 _CHANNEL_NAMES = {
-    1: "Channel 1: Git → Roadmap",
-    2: "Channel 2: Memory → Roadmap",
+    1: "Channel 1: Git → Track",
+    2: "Channel 2: Memory → Track",
     3: "Channel 3: Manifest → Docs",
+    4: "Channel 4: Track Housekeeping",
 }
 
 

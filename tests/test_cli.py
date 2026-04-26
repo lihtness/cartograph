@@ -13,8 +13,8 @@ from cartograph.config import load
 # ---------------------------------------------------------------------------
 
 def _setup_project(repo):
-    (repo / "docs" / "product").mkdir(parents=True)
-    (repo / "docs" / "product" / "roadmap.md").write_text(
+    (repo / "docs" / "track").mkdir(parents=True)
+    (repo / "docs" / "track" / "current.md").write_text(
         "- [ ] embedding integration\n"
     )
     (repo / "src").mkdir()

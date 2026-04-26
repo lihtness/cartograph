@@ -15,8 +15,8 @@ from cartograph.reporter import render, write_report
 
 def _setup_project(repo):
     """Full fixture: roadmap, memory, manifest, one unrelated git commit."""
-    (repo / "docs" / "product").mkdir(parents=True)
-    (repo / "docs" / "product" / "roadmap.md").write_text(
+    (repo / "docs" / "track").mkdir(parents=True)
+    (repo / "docs" / "track" / "current.md").write_text(
         "- [ ] embedding integration\n- [x] config module\n"
     )
     (repo / ".claude" / "projects" / "test" / "memory").mkdir(parents=True)
@@ -55,7 +55,7 @@ def test_reconcile_returns_flags(repo):
 def test_reconcile_channels_run(repo):
     _setup_project(repo)
     result = run(load(repo))
-    assert result.channels_run == [1, 2, 3]
+    assert result.channels_run == [1, 2, 3, 4]
 
 
 def test_reconcile_all_channel_types_present(repo):
@@ -114,7 +114,7 @@ def test_reconcile_timestamp_is_utc(repo):
 def _make_result(flags, channels_run=None):
     return ReconcileResult(
         flags=flags,
-        channels_run=channels_run or [1, 2, 3],
+        channels_run=channels_run or [1, 2, 3, 4],
         timestamp=datetime(2026, 4, 26, 10, 0, 0, tzinfo=timezone.utc),
     )
 
@@ -127,15 +127,15 @@ def test_render_title():
 def test_render_channel_headings():
     result = _make_result([], channels_run=[1, 2, 3])
     text = render(result)
-    assert "## Channel 1: Git → Roadmap" in text
-    assert "## Channel 2: Memory → Roadmap" in text
+    assert "## Channel 1: Git → Track" in text
+    assert "## Channel 2: Memory → Track" in text
     assert "## Channel 3: Manifest → Docs" in text
 
 
 def test_render_no_issues_when_empty():
     result = _make_result([])
     text = render(result)
-    assert text.count("No issues found.") == 3
+    assert text.count("No issues found.") == 4
 
 
 def test_render_flag_in_correct_channel():

@@ -7,7 +7,7 @@ from cartograph.flag import STALE, UNTRACKED
 
 
 def _write_roadmap(repo, content):
-    p = repo / "docs" / "product" / "roadmap.md"
+    p = repo / "docs" / "track" / "current.md"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content)
 

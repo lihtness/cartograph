@@ -6,7 +6,7 @@ from cartograph.flag import ALREADY_DONE, GAP, STALE_REF
 
 
 def _write_roadmap(tmp_path, content):
-    p = tmp_path / "docs" / "product" / "roadmap.md"
+    p = tmp_path / "docs" / "track" / "current.md"
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(content)
 

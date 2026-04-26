@@ -42,7 +42,7 @@ def test_init_creates_cartograph_md(tmp_path):
 
 def test_init_creates_claude_md(tmp_path):
     init(tmp_path)
-    assert "## Documentation Structure" in (tmp_path / "CLAUDE.md").read_text()
+    assert "## Session Start" in (tmp_path / "CLAUDE.md").read_text()
 
 
 def test_init_creates_index_files(tmp_path):
@@ -112,13 +112,13 @@ def test_init_appends_to_existing_claude_md(tmp_path):
     init(tmp_path)
     content = (tmp_path / "CLAUDE.md").read_text()
     assert "# Existing" in content
-    assert "## Documentation Structure" in content
+    assert "## Session Start" in content
 
 
 def test_init_does_not_duplicate_claude_section(tmp_path):
     init(tmp_path)
     init(tmp_path)
-    assert (tmp_path / "CLAUDE.md").read_text().count("## Documentation Structure") == 1
+    assert (tmp_path / "CLAUDE.md").read_text().count("## Session Start") == 1
 
 
 def test_init_does_not_overwrite_existing_index_md(tmp_path):

@@ -9,7 +9,13 @@ from pathlib import Path
 class DocsConfig:
     root: str = "docs"
     manifest: str = ".cartograph/manifest.toml"
-    roadmap: str = "docs/product/roadmap.md"
+
+
+@dataclass
+class TrackConfig:
+    dir: str = "docs/track"
+    current: str = "current.md"
+    close_threshold: int = 10
 
 
 @dataclass
@@ -43,12 +49,14 @@ class ChannelsConfig:
     git: bool = True
     memory: bool = True
     manifest: bool = True
+    track: bool = True
 
 
 @dataclass
 class Config:
     repo_path: Path
     docs: DocsConfig = field(default_factory=DocsConfig)
+    track: TrackConfig = field(default_factory=TrackConfig)
     memory: MemoryConfig = field(default_factory=MemoryConfig)
     git: GitConfig = field(default_factory=GitConfig)
     reconcile: ReconcileConfig = field(default_factory=ReconcileConfig)
@@ -65,6 +73,7 @@ def load(repo_path: Path) -> Config:
     return Config(
         repo_path=repo_path,
         docs=_merge(DocsConfig, raw.get("docs", {})),
+        track=_merge(TrackConfig, raw.get("track", {})),
         memory=_merge(MemoryConfig, raw.get("memory", {})),
         git=_merge(GitConfig, raw.get("git", {})),
         reconcile=_merge(ReconcileConfig, raw.get("reconcile", {})),

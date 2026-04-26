@@ -14,7 +14,7 @@ def run(config: Config) -> list[Flag]:
     if not memory_files:
         return []
 
-    roadmap_path = config.repo_path / config.docs.roadmap
+    roadmap_path = config.repo_path / config.track.dir / config.track.current
     if not roadmap_path.exists():
         return []
 

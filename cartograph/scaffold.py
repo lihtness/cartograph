@@ -69,17 +69,16 @@ _TEMPLATES: dict[str, list[str]] = {
 _DEFAULT_TEMPLATE = "software"
 
 _CLAUDE_SECTION = """\
-## Documentation Structure
+## Session Start
 
-docs/ is organized by concept. CARTOGRAPH.md at the project root is the routing map.
-Each section declares a primary_question — the question that content in that section answers.
-
-When asked to document something, read CARTOGRAPH.md and route to the section
-whose primary_question the content answers.
-
+Run `cartograph context` at the start of each session.
+It outputs current work, reconcile status, and documentation sections — everything needed to orient.
+Pull additional context on demand: read a section's INDEX.md before working in it,
+specific files only when the task requires them.
 Do not write or update documentation without being asked.
-The user decides what gets captured and when.
 """
+
+_CLAUDE_DEDUP_MARKER = "## Session Start"
 
 
 def init(repo_path: Path, template: str | None = None) -> None:
@@ -205,7 +204,7 @@ def _write_index_md(path: Path, section: Section) -> None:
 def _update_claude_md(path: Path) -> None:
     if path.exists():
         existing = path.read_text()
-        if "## Documentation Structure" not in existing:
+        if _CLAUDE_DEDUP_MARKER not in existing:
             path.write_text(existing.rstrip() + "\n\n" + _CLAUDE_SECTION)
     else:
         path.write_text(_CLAUDE_SECTION)
