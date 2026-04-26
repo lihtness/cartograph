@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Cartograph — Session Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600&display=swap');
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #0d0f18;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 24px;
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  }
+
+  .hero {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+
+  .hero h1 {
+    font-size: 1.6rem;
+    font-weight: 500;
+    color: #e2e8f0;
+    letter-spacing: 0.04em;
+    margin-bottom: 8px;
+  }
+
+  .hero p {
+    font-size: 0.8rem;
+    color: #64748b;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .split {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+    width: 100%;
+    max-width: 1100px;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow:
+      0 0 0 1px rgba(99,102,241,0.15),
+      0 32px 80px rgba(0,0,0,0.6),
+      0 0 60px rgba(99,102,241,0.04);
+  }
+
+  .pane {
+    background: #111827;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .pane-chrome {
+    background: #1a2035;
+    padding: 10px 16px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    border-bottom: 1px solid rgba(255,255,255,0.05);
+  }
+
+  .dots {
+    display: flex;
+    gap: 5px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+  }
+  .dot-red    { background: #ff5f57; }
+  .dot-yellow { background: #febc2e; }
+  .dot-green  { background: #28c840; }
+
+  .pane-title {
+    font-size: 0.68rem;
+    color: #4b5563;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-left: 4px;
+  }
+
+  .pane-body {
+    padding: 20px 22px 24px;
+    flex: 1;
+  }
+
+  /* ── prompt line ── */
+  .prompt-line {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 18px;
+  }
+
+  .prompt-sym {
+    color: #6366f1;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+
+  .prompt-cmd {
+    font-size: 0.82rem;
+    color: #e2e8f0;
+  }
+
+  .cursor {
+    display: inline-block;
+    width: 7px;
+    height: 13px;
+    background: #6366f1;
+    animation: blink 1.2s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+
+  @keyframes blink {
+    0%, 100% { opacity: 1; }
+    50%       { opacity: 0; }
+  }
+
+  /* ── section headers ── */
+  .section-header {
+    font-size: 0.72rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin: 16px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid rgba(255,255,255,0.06);
+  }
+
+  .sh-work      { color: #34d399; }
+  .sh-reconcile { color: #f59e0b; }
+  .sh-orient    { color: #818cf8; }
+  .sh-claude    { color: #c084fc; }
+
+  /* ── track items ── */
+  .track-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 0.78rem;
+    color: #94a3b8;
+    margin: 5px 0;
+    line-height: 1.5;
+  }
+
+  .check-open {
+    color: #334155;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .check-done {
+    color: #34d399;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .track-item.done span { color: #475569; text-decoration: line-through; }
+
+  /* ── reconcile row ── */
+  .recon-row {
+    font-size: 0.75rem;
+    color: #94a3b8;
+    margin: 4px 0;
+    line-height: 1.6;
+  }
+
+  .recon-row .label  { color: #64748b; }
+  .recon-row .value  { color: #fbbf24; }
+  .recon-row .hint   { color: #4b5563; font-style: italic; }
+
+  /* ── orientation table ── */
+  .orient-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 4px;
+  }
+
+  .orient-table td {
+    font-size: 0.72rem;
+    padding: 4px 6px;
+    vertical-align: top;
+    line-height: 1.5;
+  }
+
+  .orient-table td:first-child {
+    color: #818cf8;
+    width: 110px;
+    font-weight: 500;
+  }
+
+  .orient-table td:nth-child(2) {
+    color: #475569;
+    width: 70px;
+  }
+
+  .orient-table td:last-child { color: #64748b; }
+
+  .lc-stable   { color: #34d399 !important; }
+  .lc-moderate { color: #f59e0b !important; }
+  .lc-fast     { color: #f87171 !important; }
+
+  /* ── callout ── */
+  .callout {
+    margin-top: 14px;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 0.73rem;
+    line-height: 1.6;
+    border-left: 3px solid;
+  }
+
+  .callout-amber {
+    background: rgba(251,191,36,0.06);
+    border-color: #f59e0b;
+    color: #fbbf24;
+  }
+
+  .callout-purple {
+    background: rgba(99,102,241,0.07);
+    border-color: #6366f1;
+    color: #a5b4fc;
+  }
+
+  .callout-green {
+    background: rgba(52,211,153,0.06);
+    border-color: #34d399;
+    color: #6ee7b7;
+  }
+
+  .callout .cmd {
+    font-weight: 600;
+    color: #e2e8f0;
+  }
+
+  /* ── claude pane specifics ── */
+  .agent-line {
+    display: flex;
+    gap: 10px;
+    margin: 6px 0;
+    font-size: 0.77rem;
+    line-height: 1.6;
+  }
+
+  .agent-sym {
+    color: #c084fc;
+    font-weight: 600;
+    flex-shrink: 0;
+    font-size: 0.8rem;
+  }
+
+  .agent-text { color: #94a3b8; }
+  .agent-text .hi { color: #e2e8f0; }
+  .agent-text .green { color: #34d399; }
+  .agent-text .amber { color: #fbbf24; }
+  .agent-text .purple { color: #c084fc; }
+
+  /* ── divider between panes ── */
+  .pane-divider {
+    width: 2px;
+    background: linear-gradient(
+      to bottom,
+      transparent,
+      rgba(99,102,241,0.3) 20%,
+      rgba(99,102,241,0.3) 80%,
+      transparent
+    );
+  }
+
+  /* ── footer ── */
+  .footer {
+    margin-top: 28px;
+    font-size: 0.68rem;
+    color: #374151;
+    letter-spacing: 0.06em;
+    text-align: center;
+  }
+
+  .footer a { color: #4b5563; text-decoration: none; }
+  .footer a:hover { color: #818cf8; }
+
+  /* gradient glow behind the card */
+  .glow-wrap {
+    position: relative;
+    width: 100%;
+    max-width: 1100px;
+  }
+
+  .glow-wrap::before {
+    content: '';
+    position: absolute;
+    inset: -40px;
+    background: radial-gradient(ellipse at 30% 50%, rgba(99,102,241,0.07) 0%, transparent 70%),
+                radial-gradient(ellipse at 70% 50%, rgba(52,211,153,0.05) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .split { position: relative; z-index: 1; }
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <h1>Cartograph</h1>
+  <p>Documentation infrastructure for AI-augmented projects</p>
+</div>
+
+<div class="glow-wrap">
+  <div class="split">
+
+    <!-- LEFT: cartograph context -->
+    <div class="pane">
+      <div class="pane-chrome">
+        <div class="dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <span class="pane-title">Terminal — portfolio</span>
+      </div>
+      <div class="pane-body">
+
+        <div class="prompt-line">
+          <span class="prompt-sym">❯</span>
+          <span class="prompt-cmd">cartograph context</span>
+        </div>
+
+        <div class="section-header sh-work">Current Work</div>
+
+        <div class="track-item">
+          <span class="check-open">[ ]</span>
+          <span>0.4 &nbsp;Reddit RSS / feed watcher</span>
+        </div>
+        <div class="track-item">
+          <span class="check-open">[ ]</span>
+          <span>1.5 &nbsp;Calibration pre-submit warning</span>
+        </div>
+        <div class="track-item">
+          <span class="check-open">[ ]</span>
+          <span>4.1 &nbsp;Quick add/sell UX on /positions</span>
+        </div>
+        <div class="track-item">
+          <span class="check-open">[ ]</span>
+          <span>4.2 &nbsp;Post-mortem tagging</span>
+        </div>
+        <div class="track-item">
+          <span class="check-open">[ ]</span>
+          <span>4.5 &nbsp;Broker execution capture</span>
+        </div>
+        <div class="track-item done">
+          <span class="check-done">[x]</span>
+          <span>M12 HMM regime detection</span>
+        </div>
+        <div class="track-item done">
+          <span class="check-done">[x]</span>
+          <span>Intranet access — Next.js systemd unit</span>
+        </div>
+
+        <div class="section-header sh-reconcile" style="margin-top:20px;">Reconcile</div>
+        <div class="recon-row"><span class="label">Last run: </span><span class="value">2026-04-20</span><span class="label">  ·  </span><span class="value">3 resolved flag(s)</span></div>
+        <div class="recon-row hint">Run <span style="color:#94a3b8">cartograph reconcile</span> for full drift report.</div>
+
+        <div class="section-header sh-orient" style="margin-top:20px;">Orientation</div>
+        <table class="orient-table">
+          <tr>
+            <td>thesis</td>
+            <td class="lc-stable">stable</td>
+            <td>Why does this system exist? Non-negotiable rules.</td>
+          </tr>
+          <tr>
+            <td>architecture</td>
+            <td class="lc-moderate">moderate</td>
+            <td>Agent roster, thresholds, stack decisions.</td>
+          </tr>
+          <tr>
+            <td>quality</td>
+            <td class="lc-moderate">moderate</td>
+            <td>Shadow backtests, 4-gate signal validation.</td>
+          </tr>
+          <tr>
+            <td>product</td>
+            <td class="lc-fast">fast</td>
+            <td>What are we building next? Current roadmap.</td>
+          </tr>
+        </table>
+
+      </div>
+    </div>
+
+    <div class="pane-divider"></div>
+
+    <!-- RIGHT: /cartograph skill response -->
+    <div class="pane">
+      <div class="pane-chrome">
+        <div class="dots">
+          <div class="dot dot-red"></div>
+          <div class="dot dot-yellow"></div>
+          <div class="dot dot-green"></div>
+        </div>
+        <span class="pane-title">Claude Code — /cartograph</span>
+      </div>
+      <div class="pane-body">
+
+        <div class="prompt-line">
+          <span class="prompt-sym" style="color:#c084fc">❯</span>
+          <span class="prompt-cmd">/cartograph</span>
+          <span class="cursor"></span>
+        </div>
+
+        <div class="section-header sh-claude">Session Brief</div>
+
+        <div class="agent-line">
+          <span class="agent-sym">◆</span>
+          <span class="agent-text">
+            <span class="hi">5 open items</span> across tiers 0–4.
+            Heaviest: <span class="green">4.1</span> quick-add UX and
+            <span class="green">4.2</span> post-mortem tagging — both
+            unstarted, no git activity since last reconcile.
+          </span>
+        </div>
+
+        <div class="agent-line">
+          <span class="agent-sym">◆</span>
+          <span class="agent-text">
+            <span class="hi">2 closed items</span> pending seal.
+            Run <span class="purple">/cartograph close</span> to archive them
+            to <span class="hi">2026-W18.md</span>.
+          </span>
+        </div>
+
+        <div class="agent-line">
+          <span class="agent-sym">◆</span>
+          <span class="agent-text">
+            Reconcile last ran <span class="amber">6 days ago</span>.
+            Git has moved since — consider
+            <span class="purple">/cartograph reconcile</span> before
+            starting new work to surface drift.
+          </span>
+        </div>
+
+        <div class="callout callout-amber" style="margin-top: 18px;">
+          <span class="cmd">2 closed items pending seal</span><br>
+          Run <span class="cmd">/cartograph close</span> to move them to
+          <span class="cmd">docs/track/2026-W18.md</span> and keep
+          current.md clean.
+        </div>
+
+        <div class="callout callout-purple" style="margin-top: 10px;">
+          <span class="cmd">Reconcile 6 days old</span><br>
+          Git activity since last run — run
+          <span class="cmd">/cartograph reconcile</span> to catch
+          any STALE or UNTRACKED flags before the week closes.
+        </div>
+
+        <div class="callout callout-green" style="margin-top: 10px;">
+          <span class="cmd">Ready to continue</span><br>
+          What do you want to work on? The 4.x tier items are all
+          unstarted — or name a specific item.
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="footer">
+  <a href="https://github.com/lihtness/cartograph">github.com/lihtness/cartograph</a>
+  &nbsp;·&nbsp; MIT &nbsp;·&nbsp; zero required dependencies
+</div>
+
+</body>
+</html>
