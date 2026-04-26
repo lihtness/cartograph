@@ -23,7 +23,9 @@ def main(argv=None, repo_path=None):
 
     sub.add_parser("status", help="Show last run timestamp and resolved flag count.")
 
-    sub.add_parser("context", help="Print session context: current work, reconcile status, orientation.")
+    p_context = sub.add_parser("context", help="Print session context: current work, reconcile status, orientation.")
+    p_context.add_argument("--query", default=None, metavar="QUERY",
+                           help="Rank orientation sections by relevance to this query (requires cartograph[embeddings]).")
 
     p_init = sub.add_parser("init", help="Scaffold a new project.")
     p_init.add_argument("--template", default=None, metavar="TEMPLATE")
@@ -64,7 +66,7 @@ def main(argv=None, repo_path=None):
         parser.print_help()
         return 0
     if args.command == "context":
-        return _context(config)
+        return _context(config, getattr(args, "query", None))
     if args.command == "reconcile":
         return _reconcile(config)
     if args.command == "resolve":
@@ -90,9 +92,9 @@ def main(argv=None, repo_path=None):
     return 0
 
 
-def _context(config):
+def _context(config, query=None):
     from cartograph import context as context_mod
-    print(context_mod.generate(config))
+    print(context_mod.generate(config, query=query))
     return 0
 
 

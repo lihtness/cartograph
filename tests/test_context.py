@@ -1,3 +1,4 @@
+import pytest
 import subprocess
 from datetime import datetime, timezone
 
@@ -150,3 +151,71 @@ def test_cli_context_prints_output(tmp_path, capsys):
     assert "## Current work" in out
     assert "## Reconcile" in out
     assert "## Orientation" in out
+
+
+# ---------------------------------------------------------------------------
+# query ranking
+# ---------------------------------------------------------------------------
+
+def _fake_embed_factory(n_sections):
+    """Return an embed fn that gives query vec [1,0] and sections with decreasing similarity."""
+    np = pytest.importorskip("numpy")
+
+    def fake_embed(texts):
+        vecs = np.zeros((len(texts), 2))
+        vecs[0] = [1.0, 0.0]
+        for i in range(1, len(texts)):
+            vecs[i] = [round(1.0 - i * 0.15, 4), round(i * 0.15, 4)]
+        return vecs
+
+    return fake_embed
+
+
+def test_query_ranked_shows_top_note(tmp_path, monkeypatch):
+    pytest.importorskip("numpy")
+    _init_scaffold(tmp_path)
+    import cartograph.adapters.embeddings as emb
+    monkeypatch.setattr(emb, "_AVAILABLE", True)
+    monkeypatch.setattr(emb, "embed", _fake_embed_factory(5))
+    out = generate(load(tmp_path), query="architecture decisions")
+    assert 'Top sections for: "architecture decisions"' in out
+
+
+def test_query_ranked_limits_to_three(tmp_path, monkeypatch):
+    pytest.importorskip("numpy")
+    _init_scaffold(tmp_path)
+    import cartograph.adapters.embeddings as emb
+    monkeypatch.setattr(emb, "_AVAILABLE", True)
+    monkeypatch.setattr(emb, "embed", _fake_embed_factory(5))
+    out = generate(load(tmp_path), query="architecture decisions")
+    orientation = out.split("## Orientation")[1]
+    section_rows = [l for l in orientation.splitlines() if " — " in l and not l.startswith("_")]
+    assert len(section_rows) == 3
+
+
+def test_query_no_embeddings_fallback_shows_all(tmp_path, monkeypatch):
+    _init_scaffold(tmp_path)
+    import cartograph.adapters.embeddings as emb
+    monkeypatch.setattr(emb, "_AVAILABLE", False)
+    out = generate(load(tmp_path), query="architecture decisions")
+    assert "unavailable" in out
+    orientation = out.split("## Orientation")[1]
+    section_rows = [l for l in orientation.splitlines() if " — " in l and not l.startswith("_")]
+    assert len(section_rows) == 5
+
+
+def test_query_none_shows_all_sections(tmp_path):
+    _init_scaffold(tmp_path)
+    out = generate(load(tmp_path), query=None)
+    assert 'Top sections for' not in out
+    orientation = out.split("## Orientation")[1]
+    assert orientation.count(" — ") == 5
+
+
+def test_cli_context_query_flag(tmp_path, monkeypatch, capsys):
+    _init_scaffold(tmp_path)
+    import cartograph.adapters.embeddings as emb
+    monkeypatch.setattr(emb, "_AVAILABLE", False)
+    main(["context", "--query", "ops and deployment"], repo_path=tmp_path)
+    out = capsys.readouterr().out
+    assert "unavailable" in out

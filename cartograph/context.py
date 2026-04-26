@@ -11,7 +11,7 @@ from cartograph import state as state_mod
 _ITEM_PREFIX = re.compile(r"^[-*•]\s*\[[ xX]\]\s*|^[-*•]\s*", re.IGNORECASE)
 
 
-def generate(config: Config) -> str:
+def generate(config: Config, query: str | None = None) -> str:
     today = date.today().isoformat()
     parts = [
         f"# Project Context — {today}",
@@ -20,7 +20,7 @@ def generate(config: Config) -> str:
         "",
         *_reconcile_status(config),
         "",
-        *_orientation(config),
+        *_orientation(config, query=query),
     ]
     return "\n".join(parts)
 
@@ -63,17 +63,45 @@ def _reconcile_status(config: Config) -> list[str]:
     return lines
 
 
-def _orientation(config: Config) -> list[str]:
+def _orientation(config: Config, query: str | None = None) -> list[str]:
     from cartograph.scaffold import _load_sections
     sections = _load_sections(config.repo_path)
     lines = ["## Orientation", ""]
     if not sections:
         lines.append("No scaffold. Run `cartograph init` to scaffold this project.")
         return lines
+    if query:
+        ranked, ok = _rank_sections(sections, query)
+        if ok:
+            lines.append(f'_Top sections for: "{query}"_')
+            lines.append("")
+            sections = ranked
+        else:
+            lines.append("_Query ranking unavailable — `pip install cartograph[embeddings]`_")
+            lines.append("")
     width = max(len(s.name) for s in sections)
     for s in sections:
         lines.append(f"{s.name:<{width}}  {s.lifecycle:<8}  — {s.primary_question}")
     return lines
+
+
+def _rank_sections(sections: list, query: str) -> tuple[list, bool]:
+    try:
+        from cartograph.adapters.embeddings import available, embed, cosine_sim
+    except ImportError:
+        return sections, False
+    if not available():
+        return sections, False
+    texts = [f"{s.primary_question} {s.intent}".strip() for s in sections]
+    vecs = embed([query] + texts)
+    q_vec = vecs[0]
+    scored = sorted(
+        zip(vecs[1:], sections),
+        key=lambda pair: cosine_sim(pair[0], q_vec),
+        reverse=True,
+    )
+    top = min(3, len(sections))
+    return [s for _, s in scored[:top]], True
 
 
 def _strip_prefix(text: str) -> str:
