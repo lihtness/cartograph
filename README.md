@@ -22,6 +22,23 @@ The agent does not need a better memory system. It needs better-organized knowle
 
 ---
 
+## Commands
+
+| Command | What it does |
+|---------|-------------|
+| `cartograph context` | Print session brief: open work items, reconcile status, orientation sections |
+| `cartograph reconcile` | Run all four channels, write report to `docs/reports/`, update state |
+| `cartograph resolve <flag-id>` | Suppress a flag — it won't appear in future reports |
+| `cartograph status` | Show last reconcile timestamp and resolved flag count |
+| `cartograph init [--template T]` | Scaffold a new project (`software` · `minimal` · `research` · `product`) |
+| `cartograph add-section <name>` | Add a section: `--question "..."` `--lifecycle stable\|moderate\|fast\|mixed` |
+| `cartograph track close` | Seal `[x]` items from `current.md` into a dated period file |
+| `cartograph track close --period 2026-W18` | Seal to a specific period label |
+| `cartograph manifest add-edge` | Declare a dependency edge: `--from` `--to` `--type` `--term` `--heading` |
+| `cartograph manifest add-fact` | Declare a canonical source: `--key` `--canonical` `--duplicate` (repeatable) |
+
+---
+
 ## Install
 
 ```bash
@@ -148,10 +165,12 @@ Open items (`- [ ]`) are checked against git activity. Closed items (`- [x]`) ac
 ### Add a custom section
 
 ```bash
-cartograph add-section integrations --question "How do integrations work?"
+cartograph add-section integrations \
+  --question "How do integrations work?" \
+  --lifecycle fast
 ```
 
-This creates `docs/integrations/INDEX.md`, appends the section to `scaffold.toml`, and regenerates `CARTOGRAPH.md`.
+This creates `docs/integrations/INDEX.md`, appends the section to `scaffold.toml`, and regenerates `CARTOGRAPH.md`. `--lifecycle` defaults to `stable` if omitted.
 
 ---
 
@@ -258,11 +277,20 @@ cartograph manifest add-edge \
   --type depends_on \
   --term "embedding adapter"
 
+# Point to a specific section heading within the target file
+cartograph manifest add-edge \
+  --from docs/product/roadmap.md \
+  --to "docs/architecture/decisions.md#embedding-adapter" \
+  --type depends_on \
+  --term "embedding adapter" \
+  --heading "Embedding Adapter"
+
 # Declare a canonical source for a fact
 cartograph manifest add-fact \
   --key pricing \
   --canonical docs/thesis/pricing.md \
-  --duplicate docs/product/roadmap.md
+  --duplicate docs/product/roadmap.md \
+  --duplicate docs/ops/runbook.md
 ```
 
 ---
