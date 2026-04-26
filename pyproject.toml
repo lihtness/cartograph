@@ -21,3 +21,6 @@ cartograph = "cartograph.cli:main"
 [project.urls]
 Homepage = "https://github.com/lihtness/cartograph"
 Issues = "https://github.com/lihtness/cartograph/issues"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
