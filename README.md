@@ -6,17 +6,19 @@ Documentation infrastructure for AI-augmented projects. Structured capture, drif
 
 ## What
 
-Most AI coding assistant workflows fail at the same point: session decisions don't survive the session. You re-explain context every week. The agent contradicts something decided a month ago. Docs drift from code. Cartograph fixes the infrastructure underneath: a concept-organized doc scaffold your agent can route to accurately, and a reconciliation check that surfaces drift between session work, git activity, and your tracking file. No LLM. No database. Plain markdown and git.
+Cartograph is documentation infrastructure for AI-augmented projects. It gives your docs a concept-organized structure your agent can navigate without re-explanation, and a weekly reconciliation check that surfaces where session decisions, git activity, and documentation have drifted apart.
+
+No LLM. No database. Zero required dependencies. Plain markdown, a tiny state file, and git.
 
 ## Why
 
-Everyone building with AI coding agents eventually hits the same wall. The agent is good — but it only knows what's in its context window. Every new session starts cold. Decisions made last Tuesday are gone. The tracking file says one thing, git says another, and somewhere in a memory file from three weeks ago is the pivot that never made it anywhere.
+Every session starts cold. The agent is capable — but it only knows what is in its context window right now. Decisions made last week are gone. The tracking file says one thing, git says another, and the memory note with the pivot that changed everything is connected to nothing.
 
-The instinct is to fix this with smarter chat history management — compression, decay models, summarization. That's the wrong abstraction. The problem isn't memory. It's that intent is never captured in a durable, queryable form.
+The obvious fix is better memory — compression, summarization, smarter retrieval. That is the wrong model. The problem is not that the agent forgets. It is that intent was never captured in a durable, structured form to begin with.
 
-Cartograph is the infrastructure layer that fixes this. A concept-organized scaffold (thesis, architecture, product, ops) that both you and your agent can navigate without thinking. A lightweight reconciliation tool that runs weekly and tells you exactly where session decisions, git activity, and your documentation have drifted apart. No LLM. No database. Zero required dependencies. Plain markdown, a tiny state file, and git.
+Cartograph is the layer underneath. Docs organized by concept, each section answering one declared question at a stated lifecycle. A session brief generated on demand — current work, drift status, orientation — so the agent can continue rather than restart. A reconcile check that runs weekly and tells you exactly what has gone stale.
 
-Your agent doesn't need a better memory system. It needs better-organized knowledge to work from. That's what Cartograph builds.
+The agent does not need a better memory system. It needs better-organized knowledge to start from.
 
 ---
 
