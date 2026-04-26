@@ -76,6 +76,9 @@ It outputs current work, reconcile status, and documentation sections — everyt
 Pull additional context on demand: read a section's INDEX.md before working in it,
 specific files only when the task requires them.
 Do not write or update documentation without being asked.
+
+When you complete work items, mark them done immediately:
+`cartograph track done "term1" "term2"` — accepts one or more substrings matching open items.
 """
 
 _CLAUDE_DEDUP_MARKER = "## Session Start"

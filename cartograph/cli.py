@@ -41,6 +41,10 @@ def main(argv=None, repo_path=None):
     p_close.add_argument("--period", default=None, metavar="PERIOD",
                          help="Period label, e.g. 2026-W18 (default: current ISO week)")
 
+    p_done = ts.add_parser("done", help="Mark one or more open items as complete.")
+    p_done.add_argument("terms", nargs="+", metavar="TERM",
+                        help="Substring(s) to match against open items — one per completed task.")
+
     p_related = sub.add_parser("related", help="Show docs historically related to a code file.")
     p_related.add_argument("file", metavar="FILE")
 
@@ -83,6 +87,8 @@ def main(argv=None, repo_path=None):
     if args.command == "track":
         if args.track_command == "close":
             return _track_close(config, args.period)
+        if args.track_command == "done":
+            return _track_done(config, args.terms)
         p_track.print_help()
         return 0
     if args.command == "related":
@@ -170,6 +176,21 @@ def _related(config, file_path):
         return 0
     for md_file, section, count in results:
         print(f"{md_file}:{section}  ({count}×)")
+    return 0
+
+
+def _track_done(config, terms):
+    from cartograph import track as track_mod
+    try:
+        results = track_mod.done(config.repo_path, config, terms)
+    except FileNotFoundError as e:
+        print(f"Error: {e}")
+        return 1
+    for term, matched in results.items():
+        if matched:
+            print(f"  done: {matched}")
+        else:
+            print(f"  no match: {term!r}")
     return 0
 
 
