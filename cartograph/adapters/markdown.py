@@ -76,6 +76,55 @@ def build_heading_index(paths: list[Path]) -> dict[str, list[Heading]]:
     return {str(p): extract_headings(p) for p in paths}
 
 
+_OPEN_RE = re.compile(
+    r"\[ \]|\bnext\b|in-progress|\bTODO\b|\bplanned\b", re.IGNORECASE
+)
+_CLOSED_RE = re.compile(
+    r"\[x\]|\bdone\b|\bcomplete[d]?\b|\bshipped\b", re.IGNORECASE
+)
+
+
+@dataclass
+class RoadmapItem:
+    text: str
+    status: str     # "open" | "closed"
+    terms: set[str]
+    line: int
+    source: Path
+
+
+def parse_roadmap(path: Path) -> list[RoadmapItem]:
+    items = []
+    for lineno, line in enumerate(
+        path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1
+    ):
+        stripped = line.strip()
+        if not stripped or stripped.startswith("#"):
+            continue
+        if not re.match(r"^[-*•]|\d+\.", stripped):
+            continue
+        if _OPEN_RE.search(stripped):
+            status = "open"
+        elif _CLOSED_RE.search(stripped):
+            status = "closed"
+        else:
+            continue
+        items.append(RoadmapItem(
+            text=stripped,
+            status=status,
+            terms=normalize(stripped),
+            line=lineno,
+            source=path,
+        ))
+    return items
+
+
+def jaccard(a: set[str], b: set[str]) -> float:
+    if not a or not b:
+        return 0.0
+    return len(a & b) / len(a | b)
+
+
 def normalize(text: str) -> set[str]:
     tokens = re.findall(r"[a-z][a-z0-9]*", text.lower())
     return {t.rstrip("s") for t in tokens} - _STOP
