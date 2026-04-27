@@ -77,8 +77,11 @@ Pull additional context on demand: read a section's INDEX.md before working in i
 specific files only when the task requires them.
 Do not write or update documentation without being asked.
 
-When you complete work items, mark them done immediately:
-`cartograph track done "term1" "term2"` — accepts one or more substrings matching open items.
+The open items in `## Current work` are the active work queue. When the user asks you to
+work on something, check whether it matches an open item. Work through open items in order
+unless directed otherwise. When you finish an item, immediately run:
+`cartograph track done "term"` — use a substring that uniquely matches the item.
+Multiple items completed in one session: `cartograph track done "term1" "term2"`.
 """
 
 _CLAUDE_DEDUP_MARKER = "## Session Start"
