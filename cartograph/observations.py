@@ -24,9 +24,11 @@ def update(config: Config) -> int:
     if not commits:
         return 0
 
+    track_prefix = config.track.dir.rstrip("/") + "/"
     total = 0
     for commit_hash, commit_date in commits:
-        total += _process_commit(config.repo_path, obs_dir, commit_hash, commit_date)
+        total += _process_commit(config.repo_path, obs_dir, commit_hash,
+                                 commit_date, track_prefix)
 
     _save_state(obs_dir, commits[0][0])  # newest first
     return total
@@ -102,14 +104,19 @@ def _commits_since(repo_path: Path, last_commit: str | None) -> list[tuple[str, 
 
 
 def _process_commit(repo_path: Path, obs_dir: Path,
-                    commit: str, commit_date: str) -> int:
+                    commit: str, commit_date: str,
+                    track_prefix: str = "") -> int:
     result = subprocess.run(
         ["git", "diff-tree", "--no-commit-id", "-r", "--name-only",
          "--diff-filter=AM", commit],
         cwd=repo_path, capture_output=True, text=True,
     )
     files = [f.strip() for f in result.stdout.splitlines() if f.strip()]
-    md_files = [f for f in files if Path(f).suffix in _MD_EXT]
+    md_files = [
+        f for f in files
+        if Path(f).suffix in _MD_EXT
+        and (not track_prefix or not f.startswith(track_prefix))
+    ]
     code_files = [f for f in files if Path(f).suffix in _CODE_EXT]
     if not md_files or not code_files:
         return 0

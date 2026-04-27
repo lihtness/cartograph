@@ -39,15 +39,11 @@ def _current_work(config: Config) -> list[str]:
         return lines
     items = parse_roadmap(current_path)
     open_items = [i for i in items if i.status == "open"]
-    closed_count = sum(1 for i in items if i.status == "closed")
     if open_items:
         for item in open_items:
             lines.append(f"- [ ] {_strip_prefix(item.text)}")
     else:
         lines.append("No open items.")
-    if closed_count:
-        lines.append(f"\n_{closed_count} closed item(s) pending seal — "
-                     "`cartograph track close`_")
     return lines
 
 

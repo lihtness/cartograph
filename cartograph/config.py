@@ -15,7 +15,6 @@ class DocsConfig:
 class TrackConfig:
     dir: str = "docs/track"
     current: str = "current.md"
-    close_threshold: int = 10
 
 
 @dataclass
@@ -49,7 +48,6 @@ class ChannelsConfig:
     git: bool = True
     memory: bool = True
     manifest: bool = True
-    track: bool = True
 
 
 @dataclass

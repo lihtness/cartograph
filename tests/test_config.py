@@ -35,17 +35,6 @@ def test_track_defaults(tmp_path):
     cfg = load(tmp_path)
     assert cfg.track.dir == "docs/track"
     assert cfg.track.current == "current.md"
-    assert cfg.track.close_threshold == 10
-
-
-def test_track_partial_override(tmp_path):
-    (tmp_path / ".cartograph").mkdir()
-    (tmp_path / ".cartograph/config.toml").write_text(
-        '[track]\nclose_threshold = 5\n'
-    )
-    cfg = load(tmp_path)
-    assert cfg.track.close_threshold == 5
-    assert cfg.track.dir == "docs/track"
 
 
 def test_embeddings_enabled(tmp_path):

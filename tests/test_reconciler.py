@@ -55,7 +55,7 @@ def test_reconcile_returns_flags(repo):
 def test_reconcile_channels_run(repo):
     _setup_project(repo)
     result = run(load(repo))
-    assert result.channels_run == [1, 2, 3, 4]
+    assert result.channels_run == [1, 2, 3]
 
 
 def test_reconcile_all_channel_types_present(repo):
@@ -114,7 +114,7 @@ def test_reconcile_timestamp_is_utc(repo):
 def _make_result(flags, channels_run=None):
     return ReconcileResult(
         flags=flags,
-        channels_run=channels_run or [1, 2, 3, 4],
+        channels_run=channels_run or [1, 2, 3],
         timestamp=datetime(2026, 4, 26, 10, 0, 0, tzinfo=timezone.utc),
     )
 
@@ -135,7 +135,7 @@ def test_render_channel_headings():
 def test_render_no_issues_when_empty():
     result = _make_result([])
     text = render(result)
-    assert text.count("No issues found.") == 4
+    assert text.count("No issues found.") == 3
 
 
 def test_render_flag_in_correct_channel():

@@ -42,10 +42,11 @@ def test_context_closed_items_not_listed(tmp_path):
     assert "done" not in out.split("## Current work")[1].split("##")[0]
 
 
-def test_context_closed_count_shown(tmp_path):
+def test_context_closed_items_not_in_output(tmp_path):
     _write_current(tmp_path, "- [ ] open\n- [x] done one\n- [x] done two\n")
     out = generate(load(tmp_path))
-    assert "2 closed item(s)" in out
+    assert "done one" not in out
+    assert "done two" not in out
 
 
 def test_context_no_track_file_message(tmp_path):

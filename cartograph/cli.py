@@ -35,12 +35,8 @@ def main(argv=None, repo_path=None):
     p_section.add_argument("--question", default="", metavar="QUESTION")
     p_section.add_argument("--lifecycle", default="Stable", metavar="LIFECYCLE")
 
-    p_track = sub.add_parser("track", help="Manage the track directory.")
+    p_track = sub.add_parser("track", help="Manage the work checklist.")
     ts = p_track.add_subparsers(dest="track_command", metavar="track-command")
-    p_close = ts.add_parser("close", help="Seal closed items from current.md into a period file.")
-    p_close.add_argument("--period", default=None, metavar="PERIOD",
-                         help="Period label, e.g. 2026-W18 (default: current ISO week)")
-
     p_done = ts.add_parser("done", help="Mark one or more open items as complete.")
     p_done.add_argument("terms", nargs="+", metavar="TERM",
                         help="Substring(s) to match against open items — one per completed task.")
@@ -85,8 +81,6 @@ def main(argv=None, repo_path=None):
     if args.command == "add-section":
         return _add_section(config, args.name, args.question, args.lifecycle)
     if args.command == "track":
-        if args.track_command == "close":
-            return _track_close(config, args.period)
         if args.track_command == "done":
             return _track_done(config, args.terms)
         p_track.print_help()
@@ -154,17 +148,6 @@ def _add_section(config, name, question, lifecycle):
     from cartograph import scaffold
     scaffold.add_section(config.repo_path, name, question, lifecycle)
     print(f"Section '{name}' added.")
-    return 0
-
-
-def _track_close(config, period):
-    from cartograph import track as track_mod
-    try:
-        sealed = track_mod.close(config.repo_path, config, period=period)
-        print(f"Sealed: {sealed}")
-    except (FileNotFoundError, ValueError) as e:
-        print(f"Error: {e}")
-        return 1
     return 0
 
 

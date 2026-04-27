@@ -8,7 +8,6 @@ from cartograph import state as state_mod
 from cartograph.channels import git as git_channel
 from cartograph.channels import manifest as manifest_channel
 from cartograph.channels import memory as memory_channel
-from cartograph.channels import track as track_channel
 from cartograph.config import Config
 from cartograph.flag import Flag
 
@@ -36,10 +35,6 @@ def run(config: Config) -> ReconcileResult:
     if config.channels.manifest:
         flags.extend(manifest_channel.run(config))
         channels_run.append(3)
-
-    if config.channels.track:
-        flags.extend(track_channel.run(config))
-        channels_run.append(4)
 
     for flag in flags:
         if state_mod.is_resolved(state, flag.id):
